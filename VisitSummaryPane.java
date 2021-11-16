@@ -1,9 +1,11 @@
-package application;
+package com.example.demo;
 
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
@@ -17,6 +19,7 @@ public class VisitSummaryPane extends VBox {
     private GridPane vitalGrid;
     private GridPane otherSummary;
     private String userType;
+    private VisitSummary visSumm;
     Label vitalsLabel;
     Label weightLabel;
     Label heightLabel;
@@ -35,7 +38,8 @@ public class VisitSummaryPane extends VBox {
     Text allergiesText;
     Text concernsText;
     Text diagnosisText;
-    Text prescriptionText;
+    Text prescriptionName;
+    Text prescriptionAmt;
     
     TextField weightTextField;
     TextField heightTextField;
@@ -80,9 +84,10 @@ public class VisitSummaryPane extends VBox {
         allergiesText = new Text();
         concernsText = new Text();
         diagnosisText = new Text();
-        prescriptionText = new Text();
+        prescriptionName = new Text();
+        prescriptionAmt = new Text();
         
-        // Initializations for Information Display in Practictioner View
+        // Initializations for Information Display in Practitioner View
         weightTextField = new TextField();
         heightTextField = new TextField();
         tempTextField = new TextField();
@@ -101,7 +106,7 @@ public class VisitSummaryPane extends VBox {
         presAmtTextField = new TextField();
         pharmacyText = new Text();
         
-        // Build view with componenents that are common between both views
+        // Build view with components that are common between both views
         vitalGrid = new GridPane();
         vitalGrid.add(vitalsLabel, 0, 0);
         vitalGrid.add(weightLabel, 0, 1);
@@ -144,6 +149,16 @@ public class VisitSummaryPane extends VBox {
     
     // Called when User is a Patient - displays varying view
     public void patientView() {
+        weightText.setText(Integer.toString(visSumm.getWeight()));
+        heightText.setText(Integer.toString(visSumm.getHeight()));
+        tempText.setText(Integer.toString(visSumm.getBodyTemperature()));
+        pressureText.setText(Integer.toString(visSumm.getBloodPressure()));
+        diagnosisText.setText(visSumm.getDiagnosis());
+        prescriptionName.setText(visSumm.getMedicationName());
+        prescriptionAmt.setText(Integer.toString(visSumm.getMedicationAmount()));
+        allergiesText.setText(visSumm.getAllergies());
+        concernsText.setText(visSumm.getPatientConcerns());
+
         vitalGrid.add(weightText, 1, 1);
         vitalGrid.add(heightText, 1, 2);
         vitalGrid.add(tempText, 3, 1);
@@ -151,12 +166,15 @@ public class VisitSummaryPane extends VBox {
         
         otherSummary.add(diagnosisLabel, 1, 0);
         otherSummary.add(prescriptionLabel, 1, 2);
+        otherSummary.add(presNameLabel, 1, 3);
+        otherSummary.add(presAmtLabel, 1, 5);
         
         otherSummary.add(allergiesText, 0, 1);
         otherSummary.add(concernsText, 0, 3);
         otherSummary.add(diagnosisText, 1, 1);
-        otherSummary.add(prescriptionText, 1, 3);
-        
+        otherSummary.add(prescriptionName,1, 4);
+        otherSummary.add(prescriptionAmt, 1, 6);
+
     }
     
     // Called when User is a Nurse/Doctor - displays varying view
@@ -171,10 +189,31 @@ public class VisitSummaryPane extends VBox {
         otherSummary.add(diagnosisLabel, 1, 0);
         otherSummary.add(notesLabel, 1, 2);
         otherSummary.add(prescriptionLabel, 0, 4);
+        otherSummary.add(presNameLabel, 0, 5);
+        otherSummary.add(presAmtLabel, 0, 7);
         
         otherSummary.add(diagnosisTextField, 1, 1);
         otherSummary.add(notesTextField, 1, 3);
-        otherSummary.add(prescriptionText, 0, 5);
+        otherSummary.add(prescriptionName, 0, 6);
+        otherSummary.add(prescriptionAmt, 0, 8);
+        saveButton.setOnAction((ActionEvent event) -> {
+            ButtonHandler handler = new ButtonHandler();
+            String w = weightTextField.getText();
+            String h = heightTextField.getText();
+            String t = tempTextField.getText();
+            String p = pressureTextField.getText();
+            try{
+                Integer.parseInt(w);
+                Integer.parseInt(h);
+                Integer.parseInt(t);
+                Integer.parseInt(p);
+                handler.handle(event);
+                System.out.println("Information updated.");
+            }
+            catch(NumberFormatException e){
+                System.out.println("Invalid values. Please enter integers.");
+            }
+        });
     }
     
     public void doctorView() {
@@ -203,8 +242,52 @@ public class VisitSummaryPane extends VBox {
         prescriptionPane.add(prescriptionButton, 4, 1);
         prescriptionPane.setVgap(10);
         prescriptionPane.setHgap(20);
-        
-        
-        
+        saveButton.setOnAction((ActionEvent event) -> {
+            ButtonHandler handler = new ButtonHandler();
+            String w = weightTextField.getText();
+            String h = heightTextField.getText();
+            String t = tempTextField.getText();
+            String p = pressureTextField.getText();
+            String a = presAmtTextField.getText();
+            try{
+                Integer.parseInt(w);
+                Integer.parseInt(h);
+                Integer.parseInt(t);
+                Integer.parseInt(p);
+                Integer.parseInt(a);
+                handler.handle(event);
+                System.out.println("Information updated.");
+            }
+            catch(NumberFormatException e){
+                System.out.println("Invalid values. Please enter integers.");
+            }
+        });
+
+    }
+    class ButtonHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            if(userType.equals("Doctor")){
+                visSumm.setWeight(Integer.parseInt(weightTextField.getText()));
+                visSumm.setHeight(Integer.parseInt(heightTextField.getText()));
+                visSumm.setBodyTemperature(Integer.parseInt(tempTextField.getText()));
+                visSumm.setBloodPressure(Integer.parseInt(pressureTextField.getText()));
+                visSumm.setAllergies(allergiesTextField.getText());
+                visSumm.setPatientConcerns(concernsTextField.getText());
+                visSumm.setDiagnosis(diagnosisTextField.getText());
+                visSumm.setNotes(notesTextField.getText());
+                visSumm.setMedicationName(presNameTextField.getText());
+                visSumm.setMedicationAmount(Integer.parseInt(presAmtTextField.getText()));
+            }
+            else if(userType.equals("Nurse")){
+                visSumm.setWeight(Integer.parseInt(weightTextField.getText()));
+                visSumm.setHeight(Integer.parseInt(heightTextField.getText()));
+                visSumm.setBodyTemperature(Integer.parseInt(tempTextField.getText()));
+                visSumm.setBloodPressure(Integer.parseInt(pressureTextField.getText()));
+                visSumm.setAllergies(allergiesTextField.getText());
+                visSumm.setPatientConcerns(concernsTextField.getText());
+                visSumm.setDiagnosis(diagnosisTextField.getText());
+                visSumm.setNotes(notesTextField.getText());
+            }
+        }
     }
 }

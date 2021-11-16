@@ -1,9 +1,11 @@
-package application;
+package com.example.demo;
 
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
@@ -17,6 +19,7 @@ public class VisitSummaryPane extends VBox {
     private GridPane vitalGrid;
     private GridPane otherSummary;
     private String userType;
+    private VisitSummary visSumm;
     Label vitalsLabel;
     Label weightLabel;
     Label heightLabel;
@@ -175,6 +178,24 @@ public class VisitSummaryPane extends VBox {
         otherSummary.add(diagnosisTextField, 1, 1);
         otherSummary.add(notesTextField, 1, 3);
         otherSummary.add(prescriptionText, 0, 5);
+        saveButton.setOnAction((ActionEvent event) -> {
+            ButtonHandler handler = new ButtonHandler();
+            String w = weightTextField.getText();
+            String h = heightTextField.getText();
+            String t = tempTextField.getText();
+            String p = pressureTextField.getText();
+            try{
+                Integer.parseInt(w);
+                Integer.parseInt(h);
+                Integer.parseInt(t);
+                Integer.parseInt(p);
+                handler.handle(event);
+                System.out.println("Information updated.");
+            }
+            catch(NumberFormatException e){
+                System.out.println("Invalid values. Please enter integers.");
+            }
+        });
     }
     
     public void doctorView() {
@@ -203,8 +224,52 @@ public class VisitSummaryPane extends VBox {
         prescriptionPane.add(prescriptionButton, 4, 1);
         prescriptionPane.setVgap(10);
         prescriptionPane.setHgap(20);
-        
-        
-        
+        saveButton.setOnAction((ActionEvent event) -> {
+            ButtonHandler handler = new ButtonHandler();
+            String w = weightTextField.getText();
+            String h = heightTextField.getText();
+            String t = tempTextField.getText();
+            String p = pressureTextField.getText();
+            String a = presAmtTextField.getText();
+            try{
+                Integer.parseInt(w);
+                Integer.parseInt(h);
+                Integer.parseInt(t);
+                Integer.parseInt(p);
+                Integer.parseInt(a);
+                handler.handle(event);
+                System.out.println("Information updated.");
+            }
+            catch(NumberFormatException e){
+                System.out.println("Invalid values. Please enter integers.");
+            }
+        });
+
+    }
+    class ButtonHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            if(userType.equals("Doctor")){
+                visSumm.setWeight(Integer.parseInt(weightTextField.getText()));
+                visSumm.setHeight(Integer.parseInt(heightTextField.getText()));
+                visSumm.setBodyTemperature(Integer.parseInt(tempTextField.getText()));
+                visSumm.setBloodPressure(Integer.parseInt(pressureTextField.getText()));
+                visSumm.setAllergies(allergiesTextField.getText());
+                visSumm.setPatientConcerns(concernsTextField.getText());
+                visSumm.setDiagnosis(diagnosisTextField.getText());
+                visSumm.setNotes(notesTextField.getText());
+                visSumm.setMedicationName(presNameTextField.getText());
+                visSumm.setMedicationAmount(Integer.parseInt(presAmtTextField.getText()));
+            }
+            else if(userType.equals("Nurse")){
+                visSumm.setWeight(Integer.parseInt(weightTextField.getText()));
+                visSumm.setHeight(Integer.parseInt(heightTextField.getText()));
+                visSumm.setBodyTemperature(Integer.parseInt(tempTextField.getText()));
+                visSumm.setBloodPressure(Integer.parseInt(pressureTextField.getText()));
+                visSumm.setAllergies(allergiesTextField.getText());
+                visSumm.setPatientConcerns(concernsTextField.getText());
+                visSumm.setDiagnosis(diagnosisTextField.getText());
+                visSumm.setNotes(notesTextField.getText());
+            }
+        }
     }
 }

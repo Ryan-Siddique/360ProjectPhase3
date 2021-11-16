@@ -38,7 +38,8 @@ public class VisitSummaryPane extends VBox {
     Text allergiesText;
     Text concernsText;
     Text diagnosisText;
-    Text prescriptionText;
+    Text prescriptionName;
+    Text prescriptionAmt;
     
     TextField weightTextField;
     TextField heightTextField;
@@ -83,9 +84,10 @@ public class VisitSummaryPane extends VBox {
         allergiesText = new Text();
         concernsText = new Text();
         diagnosisText = new Text();
-        prescriptionText = new Text();
+        prescriptionName = new Text();
+        prescriptionAmt = new Text();
         
-        // Initializations for Information Display in Practictioner View
+        // Initializations for Information Display in Practitioner View
         weightTextField = new TextField();
         heightTextField = new TextField();
         tempTextField = new TextField();
@@ -104,7 +106,7 @@ public class VisitSummaryPane extends VBox {
         presAmtTextField = new TextField();
         pharmacyText = new Text();
         
-        // Build view with componenents that are common between both views
+        // Build view with components that are common between both views
         vitalGrid = new GridPane();
         vitalGrid.add(vitalsLabel, 0, 0);
         vitalGrid.add(weightLabel, 0, 1);
@@ -147,6 +149,16 @@ public class VisitSummaryPane extends VBox {
     
     // Called when User is a Patient - displays varying view
     public void patientView() {
+        weightText.setText(Integer.toString(visSumm.getWeight()));
+        heightText.setText(Integer.toString(visSumm.getHeight()));
+        tempText.setText(Integer.toString(visSumm.getBodyTemperature()));
+        pressureText.setText(Integer.toString(visSumm.getBloodPressure()));
+        diagnosisText.setText(visSumm.getDiagnosis());
+        prescriptionName.setText(visSumm.getMedicationName());
+        prescriptionAmt.setText(Integer.toString(visSumm.getMedicationAmount()));
+        allergiesText.setText(visSumm.getAllergies());
+        concernsText.setText(visSumm.getPatientConcerns());
+
         vitalGrid.add(weightText, 1, 1);
         vitalGrid.add(heightText, 1, 2);
         vitalGrid.add(tempText, 3, 1);
@@ -154,12 +166,15 @@ public class VisitSummaryPane extends VBox {
         
         otherSummary.add(diagnosisLabel, 1, 0);
         otherSummary.add(prescriptionLabel, 1, 2);
+        otherSummary.add(presNameLabel, 1, 3);
+        otherSummary.add(presAmtLabel, 1, 5);
         
         otherSummary.add(allergiesText, 0, 1);
         otherSummary.add(concernsText, 0, 3);
         otherSummary.add(diagnosisText, 1, 1);
-        otherSummary.add(prescriptionText, 1, 3);
-        
+        otherSummary.add(prescriptionName,1, 4);
+        otherSummary.add(prescriptionAmt, 1, 6);
+
     }
     
     // Called when User is a Nurse/Doctor - displays varying view
@@ -174,10 +189,13 @@ public class VisitSummaryPane extends VBox {
         otherSummary.add(diagnosisLabel, 1, 0);
         otherSummary.add(notesLabel, 1, 2);
         otherSummary.add(prescriptionLabel, 0, 4);
+        otherSummary.add(presNameLabel, 0, 5);
+        otherSummary.add(presAmtLabel, 0, 7);
         
         otherSummary.add(diagnosisTextField, 1, 1);
         otherSummary.add(notesTextField, 1, 3);
-        otherSummary.add(prescriptionText, 0, 5);
+        otherSummary.add(prescriptionName, 0, 6);
+        otherSummary.add(prescriptionAmt, 0, 8);
         saveButton.setOnAction((ActionEvent event) -> {
             ButtonHandler handler = new ButtonHandler();
             String w = weightTextField.getText();

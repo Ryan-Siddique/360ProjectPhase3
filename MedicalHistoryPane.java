@@ -1,4 +1,4 @@
-package application;
+package com.example.demo;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -7,9 +7,14 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 public class MedicalHistoryPane extends VBox{
     private String userType;
+    private MedicalHistory medHis;
+    private ButtonHandler buttonHandler;
+
     Label prevIssueLabel;
     Label prevMedLabel;
     Label immunizationsLabel;
@@ -58,16 +63,37 @@ public class MedicalHistoryPane extends VBox{
     }
     
     public void patientView() {
+        prevIssueText.setText(medHis.getPreviousIssues());
+        prevMedText.setText(medHis.getPreviousPrescriptions());
+        immunizationsText.setText(medHis.getImmRecord());
         this.getChildren().addAll(prevIssueLabel, prevIssueText,
                 prevMedLabel, prevMedText,
                 immunizationsLabel, immunizationsText);
-        
     }
     
     public void practitionerView() {
         this.getChildren().addAll(prevIssueLabel, prevIssueTextField, saveHealthButton,
                 prevMedLabel, prevMedTextField, saveMedButton,
                 immunizationsLabel, immunizationsTextField, saveImmuButton);
+        buttonHandler = new ButtonHandler();
+        saveHealthButton.setOnAction(buttonHandler);
+        saveMedButton.setOnAction(buttonHandler);
+        saveImmuButton.setOnAction(buttonHandler);
+
+
     }
-    
+    class ButtonHandler implements EventHandler<ActionEvent> {
+        public void handle(ActionEvent event) {
+            Object source = event.getSource();
+            if(source == saveHealthButton){
+                medHis.setPreviousIssues(prevIssueTextField.getText());
+            }
+            else if (source == saveMedButton){
+                medHis.setPreviousPrescriptions(prevMedTextField.getText());
+            }
+            else if (source == saveImmuButton){
+                medHis.setImmRecord(immunizationsTextField.getText());
+            }
+        }
+    }
 }

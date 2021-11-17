@@ -1,4 +1,4 @@
-package com.example.phase3test2;
+package application;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -15,8 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.TextField;
-
+import java.sql.*;
 
 public class MedicalCenterGUI extends Application {
     
@@ -51,7 +50,6 @@ public class MedicalCenterGUI extends Application {
     TextField patientFirst;
     TextField patientLast;
     TextField patientDOB;
-    Label PatientSignIn;
     
     Button patientSearchButton;
     Button addPatientButton;
@@ -64,8 +62,8 @@ public class MedicalCenterGUI extends Application {
     Scene loginPracScene;
     Scene patientScene;
     Scene pracScene;
-
-    //CHADMAN startLoginPatientScene
+    
+  //CHADMAN startLoginPatientScene
 
     Label welcomeLabel;
     Label patientSignInLabel;
@@ -83,11 +81,13 @@ public class MedicalCenterGUI extends Application {
     GridPane practitionerLoginPane;
     HBox buttonHBox = new HBox();
 
-    Button createAccountButton;
-    Button signInButton;
+    Button createPatientAccountButton;
+    Button signInPatientButton;
+    Button createPracAccountButton;
+    Button signInPracButton;
 
     BorderPane finalPane;
-
+    
     public void start (Stage stage) throws Exception {
         pane = new BorderPane();
         userPicked = "";
@@ -109,20 +109,27 @@ public class MedicalCenterGUI extends Application {
             }
         });
         
-        loginPatientButton = new Button("Log in as Patient");
-        loginPracButton = new Button("Log in as Practitioner");
-        loginPatientButton.setOnAction((ActionEvent event) -> {
+        
+        createPatientAccountButton = new Button("Create An Account");
+        signInPatientButton = new Button("Sign in");
+        
+        createPracAccountButton = new Button("Create An Account");
+        signInPracButton = new Button("Sign in");
+        
+        // Once button is clicked, get patient's info and display
+        signInPatientButton.setOnAction((ActionEvent event) -> {
             ButtonHandler handler2 = new ButtonHandler();
             handler2.handle(event);
-            stage.setScene(startPatientScene());  
-            
+            stage.setScene(startPatientScene());
+            // Query???
         });
         
-        loginPracButton.setOnAction((ActionEvent event) -> {
+     // Once button is clicked, display practitioner home page
+        signInPracButton.setOnAction((ActionEvent event) -> {
             ButtonHandler handler3 = new ButtonHandler();
             handler3.handle(event);
-            stage.setScene(startPracScene());  
-            
+            stage.setScene(startPracScene()); 
+            // Query??
         });
         
         // View Patient Profile as a Practitioner
@@ -160,9 +167,6 @@ public class MedicalCenterGUI extends Application {
         lastNameTextField = new TextField();
         dobTextField = new TextField();
 
-        createAccountButton = new Button("Create An Account");
-        signInButton = new Button("Sign in");
-
         patientLoginPane = new GridPane();
         patientLoginPane.add(firstNameLabel, 0, 0);
         patientLoginPane.add(lastNameLabel, 0, 1);
@@ -170,13 +174,14 @@ public class MedicalCenterGUI extends Application {
         patientLoginPane.add(firstNameTextField, 1, 0);
         patientLoginPane.add(lastNameTextField, 1, 1);
         patientLoginPane.add(dobTextField, 1, 2);
+        patientLoginPane.setVgap(15);
 
         loginPatient = new VBox();
         loginPatient.setPadding(new Insets(20, 20, 30, 20));
         loginPatient.setSpacing(15);
-        loginPatient.getChildren().addAll(welcomeLabel, patientSignInLabel, patientLoginPane, signInButton, buttonHBox);
+        loginPatient.getChildren().addAll(welcomeLabel, patientSignInLabel, patientLoginPane, signInPatientButton, buttonHBox);
         loginPatientScene = new Scene(loginPatient, 900, 600);
-        buttonHBox.getChildren().addAll(dontHaveAccountLabel, createAccountButton);
+        buttonHBox.getChildren().addAll(dontHaveAccountLabel, createPatientAccountButton);
         buttonHBox.setSpacing(15);
         loginPatient.setAlignment(Pos.CENTER);
         patientLoginPane.setAlignment(Pos.CENTER);
@@ -184,6 +189,7 @@ public class MedicalCenterGUI extends Application {
 
         return loginPatientScene;
     }
+    
     public Scene startLoginPracScene()
     {
         welcomeLabel = new Label("Welcome to Medical Portal!");
@@ -198,8 +204,6 @@ public class MedicalCenterGUI extends Application {
         lastNameTextField = new TextField();
         dobTextField = new TextField();
         idTextField = new TextField();
-        createAccountButton = new Button("Create An Account");
-        signInButton = new Button("Sign in");
         practitionerLoginPane = new GridPane();
         practitionerLoginPane.add(firstNameLabel, 0, 0);
         practitionerLoginPane.add(lastNameLabel, 0, 1);
@@ -209,25 +213,25 @@ public class MedicalCenterGUI extends Application {
         practitionerLoginPane.add(lastNameTextField, 1, 1);
         practitionerLoginPane.add(dobTextField, 1, 2);
         practitionerLoginPane.add(idTextField, 1, 3);
+        practitionerLoginPane.setVgap(15);
 
         loginPrac = new VBox();
         loginPrac.setPadding(new Insets(20, 20, 30, 20));
         loginPrac.setSpacing(15);
-        loginPrac.getChildren().addAll(welcomeLabel, practitionerSignInLabel, practitionerLoginPane, signInButton, buttonHBox);
+        loginPrac.getChildren().addAll(welcomeLabel, practitionerSignInLabel, practitionerLoginPane, signInPracButton, buttonHBox);
         loginPracScene = new Scene(loginPrac, 900, 600);
-        buttonHBox.getChildren().addAll(dontHaveAccountLabel, createAccountButton);
+        buttonHBox.getChildren().addAll(dontHaveAccountLabel, createPracAccountButton);
         buttonHBox.setSpacing(15);
         loginPrac.setAlignment(Pos.CENTER);
         practitionerLoginPane.setAlignment(Pos.CENTER);
         buttonHBox.setAlignment(Pos.CENTER);
 
-
         return loginPracScene;
     }
 
+    
     // Displays Patient Profile Scene
     public Scene startPatientScene() {
-        
         tabPane = new TabPane();
         tab1 = new Tab();
         tab2 = new Tab();
@@ -270,14 +274,124 @@ public class MedicalCenterGUI extends Application {
     }
     
     public static void main(String[] args) {
+        createNewDatabase("users.db");
+        createNewTable();
         launch(args);
     }
+    
+    public static void createNewDatabase(String filename) {
+        String url = "jdbc:sqlite:C:\\sqlite\\sqlite-tools-win32-x86-3360000" + filename;
+        try (Connection conn = DriverManager.getConnection(url)) {
+            if (conn != null) {
+                DatabaseMetaData meta = conn.getMetaData();
+                System.out.println("Driver name is" + meta.getDriverName());
+                System.out.println("New database created");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    public static void createNewTable() {
+        String jdbcURL = "jdbc:sqlite:/C:\\sqlite\\sqlite-tools-win32-x86-3360000\\usersDB.db";
+        
+        String patientTable = "CREATE TABLE IF NOT EXISTS Patient(\n"
+                + " first_name TEXT,\n"
+                + " last_name TEXT,\n"
+                + " dob TEXT,\n"
+                + " doctorId,\n"
+                + " nurseId,\n"
+                + " weight INT,\n"
+                + " height INT,\n"
+                + " temperature TEXT,\n"
+                + " blood_pressure TEXT,\n"
+                + " allergies TEXT,\n"
+                + " concerns TEXT,\n"
+                + " diagnosis TEXT,\n"
+                + " notes TEXT,\n" 
+                + " prescription_name TEXT,\n"
+                + " prescription_amt TEXT,\n"
+                + " prescription_freq TEXT,\n"
+                + " previous_issues TEXT,\n"
+                + " previous_meds TEXT,\n"
+                + " immunizations TEXT,\n"
+                + " address TEXT,\n"
+                + " phone TEXT,\n"
+                + " insurance_company TEXT,\n"
+                + " insurance_group TEXT,\n"
+                + " insurance_plan TEXT,\n"
+                + " pharmacy_name TEXT,\n"
+                + " pharmacy_address TEXT\n)";
+        
+        String doctorTable = "CREATE TABLE IF NOT EXISTS Doctor(\n"
+                + " first_name TEXT,\n"
+                + " last_name TEXT,\n"
+                + " dob TEXT,\n"
+                + " id INT PRIMARY KEY\n)";
+                
+        String nurseTable = "CREATE TABLE IF NOT EXISTS Nurse(\n"
+                + " first_name TEXT,\n"
+                + " last_name TEXT,\n"
+                + " dob TEXT,\n"
+                + " id INT PRIMARY KEY\n)";
+      
+        try {
+            Connection conn = DriverManager.getConnection(jdbcURL);
+            Statement statement = conn.createStatement();
+            statement.execute(patientTable);
+            statement.execute(doctorTable);
+            statement.execute(nurseTable);
+            
+            // Insert 2 doctors and 2 nurses
+            String insertDoctor = "INSERT OR IGNORE INTO Doctor (first_name, last_name, dob, id) "
+                    + "VALUES ('Lisa', 'Song', '02/22/1966', 1010),"
+                    + "('Elijah', 'Smith', '11/17/1970', 1011);";
+            String insertNurse = "INSERT OR IGNORE INTO Nurse (first_name, last_name, dob, id) "
+                    + "VALUES ('Mary', 'Simpson', '08/11/1980', 1012),"
+                    + "('Fred', 'Johnson', '12/13/1992', 1013);";
+            
+            String selectDoc = "SELECT * FROM Doctor";
+            String selectNurse = "SELECT * FROM Nurse";
+            
+            String delete = "DELETE * FROM Doctor";
+            
+            statement.executeUpdate(insertDoctor);
+            statement.execute(insertNurse);
+            statement.executeQuery(selectDoc);
+            statement.executeQuery(selectNurse);
+            
+            ResultSet result = statement.executeQuery(selectDoc);
+            
+            // Test print of results from making SELECT queries
+            while (result.next()) {
+                String fname = result.getString("first_name");
+                String lname = result.getString("last_name");
+                String dob = result.getString("dob");
+                int id = result.getInt("id");
+                String name = fname + " " + lname + " " + dob + " " + id;
+                System.out.println(name); 
+            }
+            
+            ResultSet result2 = statement.executeQuery(selectNurse);
+            while (result2.next()) {
+                String fname = result2.getString("first_name");
+                String lname = result2.getString("last_name");
+                String dob = result2.getString("dob");
+                int id = result2.getInt("id");
+                String name = fname + " " + lname + " " + dob + " " + id;
+                System.out.println(name); 
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+                
+    }
+    
+    
     
     class ButtonHandler implements EventHandler<ActionEvent> {
         public void handle(ActionEvent event) {
             userPicked = userOptions.getValue();
-            System.out.println(userPicked);
-         
         }
     }
     
@@ -321,6 +435,8 @@ public class MedicalCenterGUI extends Application {
             this.setPadding(new Insets(20, 20, 30, 20));
         }
     }
+    
+    
     
 
 }

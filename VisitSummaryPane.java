@@ -1,11 +1,18 @@
-package com.example.demo;
+package application;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+
 
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
@@ -14,12 +21,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 public class VisitSummaryPane extends VBox {
-    
+    String jdbcURL = "jdbc:sqlite:/C:\\sqlite\\sqlite-tools-win32-x86-3360000\\usersDB.db";
     // Instance variables
     private GridPane vitalGrid;
     private GridPane otherSummary;
     private String userType;
-    private VisitSummary visSumm;
     Label vitalsLabel;
     Label weightLabel;
     Label heightLabel;
@@ -38,8 +44,7 @@ public class VisitSummaryPane extends VBox {
     Text allergiesText;
     Text concernsText;
     Text diagnosisText;
-    Text prescriptionName;
-    Text prescriptionAmt;
+    Text prescriptionText;
     
     TextField weightTextField;
     TextField heightTextField;
@@ -60,11 +65,11 @@ public class VisitSummaryPane extends VBox {
     TextField presNameTextField;
     TextField presAmtTextField;
     Text pharmacyText;
-    
+    VisitSummary visit;
     // VisitSummaryPane constructor
     public VisitSummaryPane(String user) {
         userType = user;
-        
+        visit = new VisitSummary();
         vitalsLabel = new Label("Vital Signs");
         weightLabel = new Label("Weight: ");
         heightLabel = new Label("Height: ");
@@ -84,10 +89,9 @@ public class VisitSummaryPane extends VBox {
         allergiesText = new Text();
         concernsText = new Text();
         diagnosisText = new Text();
-        prescriptionName = new Text();
-        prescriptionAmt = new Text();
+        prescriptionText = new Text();
         
-        // Initializations for Information Display in Practitioner View
+        // Initializations for Information Display in Practictioner View
         weightTextField = new TextField();
         heightTextField = new TextField();
         tempTextField = new TextField();
@@ -129,8 +133,60 @@ public class VisitSummaryPane extends VBox {
         } else {
             doctorView();
             this.getChildren().addAll(vitalGrid, otherSummary, prescriptionPane, saveButton);
+            
         }
-        
+        saveButton.setOnAction((ActionEvent event) -> {
+            ButtonHandler handler = new ButtonHandler();
+            handler.handle(event);
+            
+            visit.setWeight(Integer.parseInt(weightTextField.getText()));
+            visit.setHeight(Integer.parseInt(weightTextField.getText()));
+            visit.setBodyTemperature(Integer.parseInt(weightTextField.getText()));
+            visit.setBloodPressure(pressureTextField.getText());
+            visit.setAllergies(allergiesTextField.getText());
+            visit.setPatientConcerns(concernsTextField.getText());
+            visit.setDiagnosis(diagnosisTextField.getText());
+            visit.setNotes(notesTextField.getText());
+            
+            int weight = Integer.parseInt(weightTextField.getText());
+            int height = Integer.parseInt(weightTextField.getText());
+            int temp = Integer.parseInt(weightTextField.getText());
+            String bp = pressureTextField.getText();
+            String allergies = allergiesTextField.getText();
+            String concerns = concernsTextField.getText();
+            String diagnosis = diagnosisTextField.getText();
+            String notes = notesTextField.getText();
+            
+            
+            try {
+                Connection conn = DriverManager.getConnection(jdbcURL);
+                
+                String insertPatientVisitSum = "INSERT OR IGNORE INTO Patient (weight, height, temperature, blood_pressure,"
+                        + "allergies, concerns, diagnosis, notes, prescription_name, prescription_amt, prescription_freq) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?),";
+                
+                
+                PreparedStatement pstmt = conn.prepareStatement(insertPatientVisitSum);
+                
+                pstmt.setInt(1, weight);
+                pstmt.setInt(2, height);
+                pstmt.setInt(3, temp);
+                pstmt.setString(4, bp);
+                pstmt.setString(5, allergies);
+                pstmt.setString(6, concerns);
+                pstmt.setString(7, diagnosis);
+                pstmt.setString(8, notes);
+                
+                pstmt.executeQuery();
+                
+              //  System.out.println("Current patient: " + result.getString("first_name") + result.getString("last_name"));
+                
+                //System.out.println(name); 
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+            
+        });
         
         // Edit appearance
         this.setPadding(new Insets(20, 20, 30, 20));
@@ -149,16 +205,53 @@ public class VisitSummaryPane extends VBox {
     
     // Called when User is a Patient - displays varying view
     public void patientView() {
-        weightText.setText(Integer.toString(visSumm.getWeight()));
-        heightText.setText(Integer.toString(visSumm.getHeight()));
-        tempText.setText(Integer.toString(visSumm.getBodyTemperature()));
-        pressureText.setText(Integer.toString(visSumm.getBloodPressure()));
-        diagnosisText.setText(visSumm.getDiagnosis());
-        prescriptionName.setText(visSumm.getMedicationName());
-        prescriptionAmt.setText(Integer.toString(visSumm.getMedicationAmount()));
-        allergiesText.setText(visSumm.getAllergies());
-        concernsText.setText(visSumm.getPatientConcerns());
-
+        try {
+            Connection conn = DriverManager.getConnection(jdbcURL);
+            Statement statement = conn.createStatement();
+            String selectPatient = "SELECT FROM Patient (weight, height, temperature, blood_pressure,"
+                    + "allergies, concerns, diagnosis, notes, prescription_name, prescription_amt, prescription_freq)";
+            ResultSet result = statement.executeQuery(selectPatient);
+            
+            int weight = result.getInt("weight");
+            int height = result.getInt("height");
+            int temperature = result.getInt("temperature");
+            String pressure = result.getString("blood_pressure");
+            String allergies = result.getString("allergies");
+            String concerns = result.getString("concerns");
+            String diagnosis = result.getString("diagnosis");
+            String notes = result.getString("notes");
+            String prescName = result.getString("prescription_name");
+            String prescAmt = result.getString("prescription_amt");
+            String prescFreq = result.getString("prescription_freq");
+            
+            
+            visit.setWeight(weight);
+            visit.setHeight(height);
+            visit.setBodyTemperature(temperature);
+            visit.setBloodPressure(pressure);
+            visit.setAllergies(allergies);
+            visit.setPatientConcerns(concerns);
+            visit.setDiagnosis(diagnosis);
+            visit.setNotes(notes);
+            visit.setMedicationName(prescName);
+            visit.setMedicationAmount(prescAmt);
+            visit.setMedicationFrequency(prescFreq);
+            
+            //System.out.println(name); 
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+            
+        weightText.setText(Integer.toString(visit.getWeight()));
+        heightText.setText(Integer.toString(visit.getHeight()));
+        tempText.setText(Integer.toString(visit.getBodyTemperature()));
+        allergiesText.setText(visit.getAllergies());
+        concernsText.setText(visit.getPatientConcerns());
+        diagnosisText.setText(visit.getDiagnosis());
+        prescriptionText.setText("Name: " + visit.getMedicationName() 
+        + "\nAmount: " + visit.getMedicationAmount() 
+        + "\nFrequency: " + visit.getMedicationFrequency());
+        
         vitalGrid.add(weightText, 1, 1);
         vitalGrid.add(heightText, 1, 2);
         vitalGrid.add(tempText, 3, 1);
@@ -166,15 +259,12 @@ public class VisitSummaryPane extends VBox {
         
         otherSummary.add(diagnosisLabel, 1, 0);
         otherSummary.add(prescriptionLabel, 1, 2);
-        otherSummary.add(presNameLabel, 1, 3);
-        otherSummary.add(presAmtLabel, 1, 5);
         
         otherSummary.add(allergiesText, 0, 1);
         otherSummary.add(concernsText, 0, 3);
         otherSummary.add(diagnosisText, 1, 1);
-        otherSummary.add(prescriptionName,1, 4);
-        otherSummary.add(prescriptionAmt, 1, 6);
-
+        otherSummary.add(prescriptionText, 1, 3);
+        
     }
     
     // Called when User is a Nurse/Doctor - displays varying view
@@ -189,31 +279,10 @@ public class VisitSummaryPane extends VBox {
         otherSummary.add(diagnosisLabel, 1, 0);
         otherSummary.add(notesLabel, 1, 2);
         otherSummary.add(prescriptionLabel, 0, 4);
-        otherSummary.add(presNameLabel, 0, 5);
-        otherSummary.add(presAmtLabel, 0, 7);
         
         otherSummary.add(diagnosisTextField, 1, 1);
         otherSummary.add(notesTextField, 1, 3);
-        otherSummary.add(prescriptionName, 0, 6);
-        otherSummary.add(prescriptionAmt, 0, 8);
-        saveButton.setOnAction((ActionEvent event) -> {
-            ButtonHandler handler = new ButtonHandler();
-            String w = weightTextField.getText();
-            String h = heightTextField.getText();
-            String t = tempTextField.getText();
-            String p = pressureTextField.getText();
-            try{
-                Integer.parseInt(w);
-                Integer.parseInt(h);
-                Integer.parseInt(t);
-                Integer.parseInt(p);
-                handler.handle(event);
-                System.out.println("Information updated.");
-            }
-            catch(NumberFormatException e){
-                System.out.println("Invalid values. Please enter integers.");
-            }
-        });
+        otherSummary.add(prescriptionText, 0, 5);
     }
     
     public void doctorView() {
@@ -242,52 +311,13 @@ public class VisitSummaryPane extends VBox {
         prescriptionPane.add(prescriptionButton, 4, 1);
         prescriptionPane.setVgap(10);
         prescriptionPane.setHgap(20);
-        saveButton.setOnAction((ActionEvent event) -> {
-            ButtonHandler handler = new ButtonHandler();
-            String w = weightTextField.getText();
-            String h = heightTextField.getText();
-            String t = tempTextField.getText();
-            String p = pressureTextField.getText();
-            String a = presAmtTextField.getText();
-            try{
-                Integer.parseInt(w);
-                Integer.parseInt(h);
-                Integer.parseInt(t);
-                Integer.parseInt(p);
-                Integer.parseInt(a);
-                handler.handle(event);
-                System.out.println("Information updated.");
-            }
-            catch(NumberFormatException e){
-                System.out.println("Invalid values. Please enter integers.");
-            }
-        });
-
+        
+        
+        
     }
-    class ButtonHandler implements EventHandler<ActionEvent> {
-        public void handle(ActionEvent event) {
-            if(userType.equals("Doctor")){
-                visSumm.setWeight(Integer.parseInt(weightTextField.getText()));
-                visSumm.setHeight(Integer.parseInt(heightTextField.getText()));
-                visSumm.setBodyTemperature(Integer.parseInt(tempTextField.getText()));
-                visSumm.setBloodPressure(Integer.parseInt(pressureTextField.getText()));
-                visSumm.setAllergies(allergiesTextField.getText());
-                visSumm.setPatientConcerns(concernsTextField.getText());
-                visSumm.setDiagnosis(diagnosisTextField.getText());
-                visSumm.setNotes(notesTextField.getText());
-                visSumm.setMedicationName(presNameTextField.getText());
-                visSumm.setMedicationAmount(Integer.parseInt(presAmtTextField.getText()));
-            }
-            else if(userType.equals("Nurse")){
-                visSumm.setWeight(Integer.parseInt(weightTextField.getText()));
-                visSumm.setHeight(Integer.parseInt(heightTextField.getText()));
-                visSumm.setBodyTemperature(Integer.parseInt(tempTextField.getText()));
-                visSumm.setBloodPressure(Integer.parseInt(pressureTextField.getText()));
-                visSumm.setAllergies(allergiesTextField.getText());
-                visSumm.setPatientConcerns(concernsTextField.getText());
-                visSumm.setDiagnosis(diagnosisTextField.getText());
-                visSumm.setNotes(notesTextField.getText());
-            }
-        }
+}
+class ButtonHandler implements EventHandler<ActionEvent> {
+    public void handle(ActionEvent event) {
+        
     }
 }

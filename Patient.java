@@ -1,3 +1,5 @@
+package application;
+
 public class Patient extends User
 {
     private String address;
@@ -36,18 +38,7 @@ public class Patient extends User
     {
         String ans="Name: " + name + "\nAddress: " + address;
     }
-    /*
-    public MedicalHistory getMedicalHistory()
-    {
-        return this.myMedHist;
+    public String toString() {
+        return this.fname + " " + this.lname + " " + this.dob;
     }
-    public MessageBoard getMessageBoard()
-    {
-        return this.myMessBoard;
-    }
-    public VisitSummary getVisitSummary()
-    {
-        return this.myVisSum;
-    }
-     */
 }

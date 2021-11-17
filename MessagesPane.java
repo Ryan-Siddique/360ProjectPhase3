@@ -20,8 +20,11 @@ public class MessagesPane extends VBox{
     TextArea newMsgTextArea;
     Button sendButton;
     
+    MessageBoard msgBoard;
+    
     public MessagesPane(String user) {
         userType = user;
+        msgBoard = new MessageBoard();
         msgLabel = new Label("Messages");
         createMsgLabel = new Label("Create New Message");
         messagesTextArea = new TextArea();
@@ -40,6 +43,13 @@ public class MessagesPane extends VBox{
             newMsgTextArea.setText("");
         });
         
+        sendButton.setOnAction(e -> {
+            msgBoard.addMessage(new User("John", "Rose", "02222002"), subjectTextField.getText(), newMsgTextArea.getText());
+            messagesTextArea.setText(msgBoard.displayMessageBoard());
+            recipientTextField.setText("To:");
+            subjectTextField.setText("Subject:");
+            newMsgTextArea.setText("Message...");
+        });
         messageTags = new HBox();
         messageTags.getChildren().addAll(recipientTextField, subjectTextField, sendButton);
         messageTags.setSpacing(10);

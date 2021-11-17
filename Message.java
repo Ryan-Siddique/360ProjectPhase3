@@ -13,11 +13,11 @@ public class Message {
     
     public String getMessage() {
        
-        return "From: " + this.sender.getName() + " Subject: " + this.subject + " Message: " + this.text;
+        return "From: " + this.getSender(sender) + " Subject: " + this.subject + " Message: " + this.text;
     }
     
     public String getSender(User sender) {
-        return sender.getName();
+        return sender.getFirstName() + sender.getLastName();
     }
     
 }

@@ -16,6 +16,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class MedicalCenterGUI extends Application {
     
@@ -23,72 +24,83 @@ public class MedicalCenterGUI extends Application {
     Label label;
     Button submitType;
     ComboBox<String> userOptions;
+    ArrayList<Patient> patientList;
     BorderPane pane;
     VBox newpane;
     
-    VBox loginPatient;
-    VBox loginPrac;
-    Button loginPatientButton;
-    Button loginPracButton;
+    VBox loginPatient; VBox loginPrac;
+    Button loginPatientButton; Button loginPracButton;
    
     TabPane tabPane;
-    Tab tab1;
-    Tab tab2;
-    Tab tab3;
-    Tab tab4;
-    VisitSummaryPane vis;
-    MedicalHistoryPane history;
-    PatientInfoPane info;
-    MessagesPane msgs;
+    Tab tab1; Tab tab2; Tab tab3; Tab tab4;
+    VisitSummaryPane vis; MedicalHistoryPane history; PatientInfoPane info; MessagesPane msgs;
     
     // Practitioner view initializations
-    Label idLabel;
-    Label patientSearchLabel;
-    Label newPatientLabel;
-    Label patientListLabel;
+    Label idLabel; Label patientSearchLabel; Label newPatientLabel; Label patientListLabel;
     ComboBox<String> patientSearchList;
-    TextField patientFirst;
-    TextField patientLast;
-    TextField patientDOB;
+    TextField patientFirst; TextField patientLast; TextField patientDOB;
     
-    Button patientSearchButton;
-    Button addPatientButton;
+    Button patientSearchButton; Button addPatientButton;
     
-    HBox patientSearchBox;
-    HBox addPatientBox;
+    HBox patientSearchBox; HBox addPatientBox;
     
-    Scene selectScene;
-    Scene loginPatientScene;
-    Scene loginPracScene;
-    Scene patientScene;
-    Scene pracScene;
+    Scene selectScene; Scene loginPatientScene; Scene loginPracScene; Scene patientScene; Scene pracScene;
     
   //CHADMAN startLoginPatientScene
 
-    Label welcomeLabel;
-    Label patientSignInLabel;
-    Label practitionerSignInLabel;
-    Label firstNameLabel;
-    Label lastNameLabel;
-    Label dobLabel;
-    Label dontHaveAccountLabel;
+    Label welcomeLabel; Label patientSignInLabel; Label practitionerSignInLabel; Label firstNameLabel; Label lastNameLabel; Label dobLabel; Label dontHaveAccountLabel;
 
-    TextField firstNameTextField;
-    TextField lastNameTextField;
-    TextField dobTextField;
-    TextField idTextField;
-    GridPane patientLoginPane;
-    GridPane practitionerLoginPane;
-    HBox buttonHBox = new HBox();
+    TextField firstNameTextField; TextField lastNameTextField; TextField dobTextField; TextField idTextField;
+    GridPane patientLoginPane; GridPane practitionerLoginPane; HBox buttonHBox = new HBox();
 
-    Button createPatientAccountButton;
-    Button signInPatientButton;
-    Button createPracAccountButton;
-    Button signInPracButton;
+    Button createPatientAccountButton; Button signInPatientButton; Button createPracAccountButton; Button signInPracButton;
 
     BorderPane finalPane;
+    String jdbcURL = "jdbc:sqlite:/C:\\sqlite\\sqlite-tools-win32-x86-3360000\\usersDB.db";
+    
+    Doctor currentDoctor;
+    Nurse currentNurse;
+    Patient currentPatient;
+    public static void main(String[] args) {
+        createNewDatabase("users.db");
+        createNewTable();
+        launch(args);
+    }
     
     public void start (Stage stage) throws Exception {
+        currentDoctor = new Doctor();
+        currentNurse = new Nurse();
+        patientList = new ArrayList<Patient>();
+        
+        // Query to add all patients in database to patient arraylist
+        try {
+            Connection conn = DriverManager.getConnection(jdbcURL);
+            Statement statement = conn.createStatement();
+            String selectPatient = "SELECT * FROM Patient";
+            statement.executeQuery(selectPatient);
+            
+            ResultSet result = statement.executeQuery(selectPatient);
+            // Test print of results from making SELECT queries
+            while (result.next()) {
+                Patient newPatient = new Patient();
+                newPatient.setFirstName(result.getString("first_name"));
+                newPatient.setLastName(result.getString("last_name"));
+                newPatient.setDOB(result.getString("dob"));
+                patientList.add(newPatient);
+                String name = newPatient.getFirstName() + newPatient.getLastName() + newPatient.dob;
+                System.out.println(name); 
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // Add patients to combo box so they can be searched for
+        patientSearchList = new ComboBox<String>();
+        for (int i = 0; i < patientList.size(); i++) {
+            patientSearchList.getItems().add(patientList.get(i).toString());
+        }
+        
+        // First window - user chooses their type of user
         pane = new BorderPane();
         userPicked = "";
         label = new Label("Please select one of the following");
@@ -96,7 +108,8 @@ public class MedicalCenterGUI extends Application {
         userOptions.getItems().add("Doctor");
         userOptions.getItems().add("Nurse");
         userOptions.getItems().add("Patient");
-
+        
+        // Once Submit is clicked, user is taken to their respective login windows
         newpane = new VBox(3);
         submitType = new Button("Submit");
         submitType.setOnAction((ActionEvent event) -> {
@@ -109,19 +122,39 @@ public class MedicalCenterGUI extends Application {
             }
         });
         
-        
         createPatientAccountButton = new Button("Create An Account");
         signInPatientButton = new Button("Sign in");
-        
         createPracAccountButton = new Button("Create An Account");
         signInPracButton = new Button("Sign in");
         
-        // Once button is clicked, get patient's info and display
+        // Once sign in button is clicked, verify patient exists, get patient's info and display
         signInPatientButton.setOnAction((ActionEvent event) -> {
             ButtonHandler handler2 = new ButtonHandler();
             handler2.handle(event);
+            String fname = firstNameTextField.getText();
+            String lname = lastNameTextField.getText();
+            String dob = dobTextField.getText();
+            
+            try {
+                Connection conn = DriverManager.getConnection(jdbcURL);
+                PreparedStatement pstmt = conn.prepareStatement("SELECT* from Patient where first_name=? AND last_name=? AND dob=?");
+                
+                pstmt.setString(1,fname);
+                pstmt.setString(2, lname);
+                pstmt.setString(3, dob);
+                
+                ResultSet result = pstmt.executeQuery();
+                
+                System.out.println("Current patient: " + result.getString("first_name") + result.getString("last_name"));
+                
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+            firstNameTextField.setText("");
+            lastNameTextField.setText("");
+            dobTextField.setText("");
+            idTextField.setText("");
             stage.setScene(startPatientScene());
-            // Query???
         });
         
      // Once button is clicked, display practitioner home page
@@ -129,7 +162,31 @@ public class MedicalCenterGUI extends Application {
             ButtonHandler handler3 = new ButtonHandler();
             handler3.handle(event);
             stage.setScene(startPracScene()); 
-            // Query??
+            String fname = firstNameTextField.getText();
+            String lname = lastNameTextField.getText();
+            String dob = dobTextField.getText();
+            int id = Integer.parseInt(idTextField.getText());
+            try {
+                Connection conn = DriverManager.getConnection(jdbcURL);
+                PreparedStatement pstmt = conn.prepareStatement("SELECT* from Doctor where first_name=? AND last_name=? AND id=?");
+                
+                pstmt.setString(1,fname);
+                pstmt.setString(2, lname);
+                pstmt.setInt(3, id);
+                
+                ResultSet result = pstmt.executeQuery();
+                
+                
+                System.out.println("Current doc: " + result.getString("first_name") + result.getString("last_name"));
+                
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+            firstNameTextField.setText("");
+            lastNameTextField.setText("");
+            dobTextField.setText("");
+            idTextField.setText("");
+            
         });
         
         // View Patient Profile as a Practitioner
@@ -137,6 +194,10 @@ public class MedicalCenterGUI extends Application {
         patientSearchButton.setOnAction((ActionEvent event) -> {
             ButtonHandler handler4 = new ButtonHandler();
             handler4.handle(event);
+            String selectedPatient = patientSearchList.getValue();
+            currentPatient = new Patient();
+            
+            
             stage.setScene(startPatientScene());  
             
         }); 
@@ -273,11 +334,7 @@ public class MedicalCenterGUI extends Application {
         return pracScene;
     }
     
-    public static void main(String[] args) {
-        createNewDatabase("users.db");
-        createNewTable();
-        launch(args);
-    }
+    
     
     public static void createNewDatabase(String filename) {
         String url = "jdbc:sqlite:C:\\sqlite\\sqlite-tools-win32-x86-3360000" + filename;
@@ -294,34 +351,15 @@ public class MedicalCenterGUI extends Application {
     
     public static void createNewTable() {
         String jdbcURL = "jdbc:sqlite:/C:\\sqlite\\sqlite-tools-win32-x86-3360000\\usersDB.db";
-        
         String patientTable = "CREATE TABLE IF NOT EXISTS Patient(\n"
-                + " first_name TEXT,\n"
-                + " last_name TEXT,\n"
-                + " dob TEXT,\n"
-                + " doctorId,\n"
-                + " nurseId,\n"
-                + " weight INT,\n"
-                + " height INT,\n"
-                + " temperature TEXT,\n"
-                + " blood_pressure TEXT,\n"
-                + " allergies TEXT,\n"
-                + " concerns TEXT,\n"
-                + " diagnosis TEXT,\n"
-                + " notes TEXT,\n" 
-                + " prescription_name TEXT,\n"
-                + " prescription_amt TEXT,\n"
-                + " prescription_freq TEXT,\n"
-                + " previous_issues TEXT,\n"
-                + " previous_meds TEXT,\n"
-                + " immunizations TEXT,\n"
-                + " address TEXT,\n"
-                + " phone TEXT,\n"
-                + " insurance_company TEXT,\n"
-                + " insurance_group TEXT,\n"
-                + " insurance_plan TEXT,\n"
-                + " pharmacy_name TEXT,\n"
-                + " pharmacy_address TEXT\n)";
+                + " first_name TEXT, last_name TEXT, dob TEXT, doctorId, nurseId,"
+                + " weight INT, height INT, temperature TEXT, blood_pressure TEXT,"
+                + " allergies TEXT, concerns TEXT, diagnosis TEXT, notes TEXT," 
+                + " prescription_name TEXT, prescription_amt TEXT, prescription_freq TEXT,"
+                + " previous_issues TEXT, previous_meds TEXT, immunizations TEXT,"
+                + " address TEXT, phone TEXT,"
+                + " insurance_company TEXT, insurance_group TEXT, insurance_plan TEXT,\n"
+                + " pharmacy_name TEXT, pharmacy_address TEXT\n)";
         
         String doctorTable = "CREATE TABLE IF NOT EXISTS Doctor(\n"
                 + " first_name TEXT,\n"
@@ -350,18 +388,19 @@ public class MedicalCenterGUI extends Application {
                     + "VALUES ('Mary', 'Simpson', '08/11/1980', 1012),"
                     + "('Fred', 'Johnson', '12/13/1992', 1013);";
             
-            String selectDoc = "SELECT * FROM Doctor";
+            String selectDoctor = "SELECT * FROM Doctor";
             String selectNurse = "SELECT * FROM Nurse";
             
             String delete = "DELETE * FROM Doctor";
             
             statement.executeUpdate(insertDoctor);
             statement.execute(insertNurse);
-            statement.executeQuery(selectDoc);
+            statement.executeQuery(selectDoctor);
             statement.executeQuery(selectNurse);
             
-            ResultSet result = statement.executeQuery(selectDoc);
+            statement.executeUpdate(insertDoctor);
             
+            ResultSet result = statement.executeQuery(selectDoctor);
             // Test print of results from making SELECT queries
             while (result.next()) {
                 String fname = result.getString("first_name");
@@ -405,14 +444,14 @@ public class MedicalCenterGUI extends Application {
             patientSearchLabel = new Label("Patient Search: ");
             newPatientLabel = new Label("New Patient: ");
             patientListLabel = new Label("Patient List: ");
-            patientSearchList = new ComboBox<String>();
+            
             patientFirst = new TextField("First Name");
             patientLast = new TextField("Last Name");
             patientDOB = new TextField("DOB");
             
             addPatientButton = new Button("Add Patient");
             
-            patientSearchList.getItems().add("John Rose");
+            
             
             patientFirst.setOnMouseClicked(e -> {
                 patientFirst.setText("");
@@ -423,6 +462,40 @@ public class MedicalCenterGUI extends Application {
             patientDOB.setOnMouseClicked(e -> {
                 patientDOB.setText("");
             });
+            
+            
+            addPatientButton.setOnAction((ActionEvent event) -> {
+                ButtonHandler handler = new ButtonHandler();
+                handler.handle(event);
+                
+                try {
+                    Connection conn = DriverManager.getConnection(jdbcURL);
+                    Statement statement = conn.createStatement();
+                    String insertPatient = "INSERT OR IGNORE INTO Patient (first_name, last_name, dob) "
+                            + "VALUES ('" + patientFirst.getText() + "', '" + patientLast.getText() + "', '" + patientDOB.getText() + "');";
+                    String selectPatient = "SELECT * FROM Patient";
+                    
+                    statement.executeUpdate(insertPatient);
+                    ResultSet result = statement.executeQuery(selectPatient);
+                    while (result.next()) {
+                        String fname = result.getString("first_name");
+                        String lname = result.getString("last_name");
+                        String dob = result.getString("dob");
+                       
+                        String name = fname + " " + lname + " " + dob;
+                        
+                        patientSearchList.getItems().add(name);
+                        
+                    }
+                } catch (SQLException e) {
+                    e.getMessage();
+                }
+                
+                patientFirst.setText("");
+                patientLast.setText("");
+                patientDOB.setText("");
+            });
+            
             
             patientSearchBox.getChildren().addAll(patientSearchLabel, patientSearchList, patientSearchButton);
             addPatientBox.getChildren().addAll(newPatientLabel, patientFirst, patientLast, patientDOB, addPatientButton);
@@ -436,9 +509,6 @@ public class MedicalCenterGUI extends Application {
         }
     }
     
-    
-    
-
 }
 
 class CustomPane extends StackPane

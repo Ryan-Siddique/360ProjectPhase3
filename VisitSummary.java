@@ -1,31 +1,33 @@
-package com.example.demo;
+package application;
 
 public class VisitSummary{
     private int weight;
     private int height;
     private int bodyTemperature;
-    private int bloodPressure;
+    private String bloodPressure;
     private String allergies;
     private String patientConcerns;
     private String diagnosis;
     private String Notes;
     private String medicationName;
-    private int medicationAmount;
+    private String medicationAmount;
+    private String medicationFrequency;
 
     public VisitSummary(){
         this.weight = 0;
         this.height = 0;
         this.bodyTemperature = 0;
-        this.bloodPressure = 0;
+        this.bloodPressure = "";
         this.allergies = "";
         this.patientConcerns = "";
         this.diagnosis = "";
         this.Notes = "";
         this.medicationName = "";
-        this.medicationAmount = 0;
+        this.medicationAmount = "";
+        this.medicationFrequency = "";
     }
 
-    public VisitSummary(int w, int h, int temp, int bp, String a, String concerns, String d, String n, String medName, int medAmt){
+    public VisitSummary(int w, int h, int temp, String bp, String a, String concerns, String d, String n, String medName, String medAmt, String medFreq){
         this.weight = w;
         this.height = h;
         this.bodyTemperature = temp;
@@ -36,6 +38,7 @@ public class VisitSummary{
         this.Notes = n;
         this.medicationName = medName;
         this.medicationAmount = medAmt;
+        this.medicationFrequency = medFreq;
     }
 
     public int getWeight() {
@@ -62,11 +65,11 @@ public class VisitSummary{
         this.bodyTemperature = bodyTemperature;
     }
 
-    public int getBloodPressure() {
+    public String getBloodPressure() {
         return bloodPressure;
     }
 
-    public void setBloodPressure(int bloodPressure) {
+    public void setBloodPressure(String bloodPressure) {
         this.bloodPressure = bloodPressure;
     }
 
@@ -110,12 +113,19 @@ public class VisitSummary{
         this.medicationName = medicationName;
     }
 
-    public int getMedicationAmount() {
+    public String getMedicationAmount() {
         return medicationAmount;
     }
 
-    public void setMedicationAmount(int medicationAmount) {
+    public void setMedicationAmount(String medicationFrequency) {
         this.medicationAmount = medicationAmount;
+    }
+    public String getMedicationFrequency() {
+        return medicationFrequency;
+    }
+
+    public void setMedicationFrequency(String medicationFrequency) {
+        this.medicationFrequency = medicationFrequency;
     }
 
 }

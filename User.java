@@ -1,7 +1,9 @@
+package application;
+
 public class User {
-    private String fname;
-    private String lname;
-    private String dob;
+    protected String fname;
+    protected String lname;
+    protected String dob;
 
     public User() {
         this.fname = "";
@@ -36,3 +38,4 @@ public class User {
         this.dob=d;
     }
 }
+    

@@ -1,5 +1,4 @@
-package com.example.demo;
-
+package application;
 
 public class MedicalHistory {
     private String previousIssues;

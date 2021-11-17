@@ -1,7 +1,9 @@
+package application;
+
 public class Nurse extends User
 {
     private int id;
-    private PractitionerHomePage pHomePage;
+   // private PractitionerHomePage pHomePage;
 
     public Nurse()
     {
@@ -20,9 +22,9 @@ public class Nurse extends User
         this.id=id;
     }
 
-    public PractitionerHomePage getPHomePage()
+/*    public PractitionerHomePage getPHomePage()
     {
         return this.pHomePage;
     }
-
+ */
 }

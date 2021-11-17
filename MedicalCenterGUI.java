@@ -1,4 +1,4 @@
-package application;
+package com.example.phase3test2;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -15,6 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.scene.control.TextField;
+
 
 public class MedicalCenterGUI extends Application {
     
@@ -49,6 +51,7 @@ public class MedicalCenterGUI extends Application {
     TextField patientFirst;
     TextField patientLast;
     TextField patientDOB;
+    Label PatientSignIn;
     
     Button patientSearchButton;
     Button addPatientButton;
@@ -61,8 +64,30 @@ public class MedicalCenterGUI extends Application {
     Scene loginPracScene;
     Scene patientScene;
     Scene pracScene;
-    
-    
+
+    //CHADMAN startLoginPatientScene
+
+    Label welcomeLabel;
+    Label patientSignInLabel;
+    Label practitionerSignInLabel;
+    Label firstNameLabel;
+    Label lastNameLabel;
+    Label dobLabel;
+    Label dontHaveAccountLabel;
+
+    TextField firstNameTextField;
+    TextField lastNameTextField;
+    TextField dobTextField;
+    TextField idTextField;
+    GridPane patientLoginPane;
+    GridPane practitionerLoginPane;
+    HBox buttonHBox = new HBox();
+
+    Button createAccountButton;
+    Button signInButton;
+
+    BorderPane finalPane;
+
     public void start (Stage stage) throws Exception {
         pane = new BorderPane();
         userPicked = "";
@@ -122,19 +147,84 @@ public class MedicalCenterGUI extends Application {
         stage.show();
     }
     
-    public Scene startLoginPatientScene() {
+    public Scene startLoginPatientScene()
+    {
+        welcomeLabel = new Label("Welcome to Medical Portal!");
+        patientSignInLabel = new Label("Patient Sign In:");
+        firstNameLabel = new Label("First Name");
+        lastNameLabel = new Label("Last Name");
+        dobLabel = new Label("Date of birth    ");
+        dontHaveAccountLabel = new Label("Don't Have an Account?");
+
+        firstNameTextField = new TextField();
+        lastNameTextField = new TextField();
+        dobTextField = new TextField();
+
+        createAccountButton = new Button("Create An Account");
+        signInButton = new Button("Sign in");
+
+        patientLoginPane = new GridPane();
+        patientLoginPane.add(firstNameLabel, 0, 0);
+        patientLoginPane.add(lastNameLabel, 0, 1);
+        patientLoginPane.add(dobLabel, 0, 2);
+        patientLoginPane.add(firstNameTextField, 1, 0);
+        patientLoginPane.add(lastNameTextField, 1, 1);
+        patientLoginPane.add(dobTextField, 1, 2);
+
         loginPatient = new VBox();
-        loginPatient.getChildren().addAll(loginPatientButton);
+        loginPatient.setPadding(new Insets(20, 20, 30, 20));
+        loginPatient.setSpacing(15);
+        loginPatient.getChildren().addAll(welcomeLabel, patientSignInLabel, patientLoginPane, signInButton, buttonHBox);
         loginPatientScene = new Scene(loginPatient, 900, 600);
+        buttonHBox.getChildren().addAll(dontHaveAccountLabel, createAccountButton);
+        buttonHBox.setSpacing(15);
+        loginPatient.setAlignment(Pos.CENTER);
+        patientLoginPane.setAlignment(Pos.CENTER);
+        buttonHBox.setAlignment(Pos.CENTER);
+
         return loginPatientScene;
     }
-    public Scene startLoginPracScene() {
+    public Scene startLoginPracScene()
+    {
+        welcomeLabel = new Label("Welcome to Medical Portal!");
+        practitionerSignInLabel = new Label("Practitioner Sign In:");
+        firstNameLabel = new Label("First Name");
+        lastNameLabel = new Label("Last Name");
+        dobLabel = new Label("Date of Birth    ");
+        idLabel = new Label("ID");
+        dontHaveAccountLabel = new Label("Don't Have an Account?");
+
+        firstNameTextField = new TextField();
+        lastNameTextField = new TextField();
+        dobTextField = new TextField();
+        idTextField = new TextField();
+        createAccountButton = new Button("Create An Account");
+        signInButton = new Button("Sign in");
+        practitionerLoginPane = new GridPane();
+        practitionerLoginPane.add(firstNameLabel, 0, 0);
+        practitionerLoginPane.add(lastNameLabel, 0, 1);
+        practitionerLoginPane.add(dobLabel, 0, 2);
+        practitionerLoginPane.add(idLabel, 0, 3);
+        practitionerLoginPane.add(firstNameTextField, 1, 0);
+        practitionerLoginPane.add(lastNameTextField, 1, 1);
+        practitionerLoginPane.add(dobTextField, 1, 2);
+        practitionerLoginPane.add(idTextField, 1, 3);
+
         loginPrac = new VBox();
-        loginPrac.getChildren().addAll(loginPracButton);
+        loginPrac.setPadding(new Insets(20, 20, 30, 20));
+        loginPrac.setSpacing(15);
+        loginPrac.getChildren().addAll(welcomeLabel, practitionerSignInLabel, practitionerLoginPane, signInButton, buttonHBox);
         loginPracScene = new Scene(loginPrac, 900, 600);
+        buttonHBox.getChildren().addAll(dontHaveAccountLabel, createAccountButton);
+        buttonHBox.setSpacing(15);
+        loginPrac.setAlignment(Pos.CENTER);
+        practitionerLoginPane.setAlignment(Pos.CENTER);
+        buttonHBox.setAlignment(Pos.CENTER);
+
+
         return loginPracScene;
     }
-    
+
     // Displays Patient Profile Scene
     public Scene startPatientScene() {
         

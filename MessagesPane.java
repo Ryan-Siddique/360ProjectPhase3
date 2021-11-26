@@ -44,7 +44,7 @@ public class MessagesPane extends VBox{
         });
         
         sendButton.setOnAction(e -> {
-            msgBoard.addMessage(new User("John", "Rose", "02222002"), subjectTextField.getText(), newMsgTextArea.getText());
+            msgBoard.addMessage(new User("Joseph", " Choi", "02222002"), subjectTextField.getText(), newMsgTextArea.getText());
             messagesTextArea.setText(msgBoard.displayMessageBoard());
             recipientTextField.setText("To:");
             subjectTextField.setText("Subject:");

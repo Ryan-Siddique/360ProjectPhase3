@@ -1,0 +1,1 @@
+160,71,98,120/80,penicilin,cough,common cold,none,tylenol,20

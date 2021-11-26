@@ -27,7 +27,7 @@ public class VisitSummary{
         this.medicationFrequency = "";
     }
 
-    public VisitSummary(int w, int h, int temp, String bp, String a, String concerns, String d, String n, String medName, String medAmt, String medFreq){
+    public VisitSummary(int w, int h, int temp, String bp, String a, String concerns, String d, String n, String medName, String medAmt){
         this.weight = w;
         this.height = h;
         this.bodyTemperature = temp;
@@ -38,7 +38,7 @@ public class VisitSummary{
         this.Notes = n;
         this.medicationName = medName;
         this.medicationAmount = medAmt;
-        this.medicationFrequency = medFreq;
+        
     }
 
     public int getWeight() {
@@ -117,7 +117,7 @@ public class VisitSummary{
         return medicationAmount;
     }
 
-    public void setMedicationAmount(String medicationFrequency) {
+    public void setMedicationAmount(String medicationAmount) {
         this.medicationAmount = medicationAmount;
     }
     public String getMedicationFrequency() {
